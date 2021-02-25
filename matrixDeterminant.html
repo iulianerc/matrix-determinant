@@ -97,17 +97,6 @@
         }
     }
     const findMinorMatrix = (matrix, column, rowToRemove = 0) => {
-        if (rowToRemove) {
-            console.log(matrix, "temp matrix : column", column, ' row ', rowToRemove)
-            console.log(matrix.filter((row, rowIndex) => {
-                if (rowToRemove) {
-                    return rowToRemove !== rowIndex
-                }
-                return rowIndex
-            }).map(row => {
-                return row.filter((value, columnIndex) => columnIndex !== column)
-            }))
-        }
         return matrix.filter((row, rowIndex) => {
             if (rowToRemove) {
                 return rowToRemove !== rowIndex
