@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            padding-top: 100px;
+        }
+
+        table {
+            border: 1px;
+            border-style: none solid;
+            border-collapse: collapse;
+        }
+
+        table tr td {
+            padding: 10px;
+        }
+
+        .field {
+            width: 50px;
+            height: 40px;
+        }
+
+        button {
+            position: absolute;
+            top: 20px;
+            padding: 10px 15px;
+            border: 1px solid lightgreen;
+            background: transparent;
+            cursor: pointer;
+        }
+        #matrix_container {
+            display: flex;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<button id="run">Gaseste determenatul</button>
+<div id="matrix_container">
+    <table id="table" style="margin-right: 100px;"></table>
+    <h1 id="det"></h1>
+</div>
+<div>
+    <h1>Inverse Matrix</h1>
+    <table id="inverseMatrix"></table>
+</div>
+<script>
+    const table = document.getElementById("table")
+    const inverseMatrixTable = document.getElementById('inverseMatrix')
+    const run = document.getElementById('run')
+    const detBlock = document.getElementById('det')
+    const matrix = []
+    const tempMatrix = [
+        [1, 4],
+        [1, 4],
+    ]
+    let inverseMatrix = []
+    let row = Number(prompt('Dati numarul de linii'))
+    while (!row || row < 0) {
+        alert('introduceti un numar, care este > 0')
+        row = Number(prompt('Dati inca o data numarul de linii'))
+    }
+    let column = Number(prompt('Dati numarul de coloane'))
+    while (!column || column < 0) {
+        alert('introduceti un numar, care este > 0')
+        column = Number(prompt('Dati inca o data numarul de coloane'))
+    }
+    const createMatrix = (row, column, appendTo, isText) => {
+        for (let i = 0; i < row; i++) {
+            const tr = document.createElement('tr')
+            for (let j = 0; j < column; j++) {
+                const td = document.createElement('td')
+                td.innerHTML = `<input type="text" class="field" value="${isText ? inverseMatrix[i][j] : ''}">`
+                tr.appendChild(td)
+            }
+            appendTo.appendChild(tr)
+        }
+    }
+    createMatrix(row, column, table)
+
+    const getMatrix = () => {
+        let rowIndex = 0;
+        let columnIndex = 0;
+        for (const row of table.rows) {
+            for (const cell of row.children) {
+                if (typeof matrix[rowIndex] !== 'object') {
+                    matrix[rowIndex] = []
+                }
+                matrix[rowIndex][columnIndex] = Number(eval(cell.children[0].value))
+                columnIndex++;
+            }
+            columnIndex = 0
+            rowIndex++;
+        }
+    }
+    const findMinorMatrix = (matrix, column, rowToRemove = 0) => {
+        if (rowToRemove) {
+            console.log(matrix, "temp matrix : column", column, ' row ', rowToRemove)
+            console.log(matrix.filter((row, rowIndex) => {
+                if (rowToRemove) {
+                    return rowToRemove !== rowIndex
+                }
+                return rowIndex
+            }).map(row => {
+                return row.filter((value, columnIndex) => columnIndex !== column)
+            }))
+        }
+        return matrix.filter((row, rowIndex) => {
+            if (rowToRemove) {
+                return rowToRemove !== rowIndex
+            }
+            return rowIndex
+        }).map(row => {
+            return row.filter((value, columnIndex) => columnIndex !== column)
+        })
+    }
+    const findInverseMatrix = (matrix = matrix) => {
+        for (let rowIndex = 0; rowIndex < matrix[0].length; rowIndex++) {
+            inverseMatrix[rowIndex] = []
+        }
+        for (let rowIndex = 0; rowIndex < matrix[0].length; rowIndex++) {
+            for (let columnIndex = 0; columnIndex < matrix[0].length; columnIndex++) {
+                const det = findDet(matrix)
+            if (!det) {
+                return 'Nu exista matrice inversa pentru aceasta matrice, deoarece determiatul este 0';
+            }
+                inverseMatrix[columnIndex][rowIndex] = (
+                   (1 / det) * Math.pow(-1, columnIndex + rowIndex) * findDet(findMinorMatrix(matrix, columnIndex, rowIndex))
+                )
+            }
+        }
+    }
+    const showInverseMatrix = () => {
+        inverseMatrix = []
+            // [
+            //     [1, -3, 0, 0],
+            //     [0, 1, 0, 0],
+            //     [0, 0, 2, 1],
+            //     [0, 0, 1, 1]
+            // ]
+        const error = findInverseMatrix(matrix)
+        if (error) {
+            alert(error)
+            return;
+        }
+        createMatrix(row, column, inverseMatrixTable, true)
+    }
+    const findDet = (matrix) => {
+        if (matrix[0].length === 1) {
+            return matrix[0][0]
+        }
+        let sum = 0
+        for (let i = 0; i < matrix[0].length; i++) {
+            sum += matrix[0][i] * Math.pow(-1, i) * findDet(findMinorMatrix(matrix, i))
+        }
+        return sum;
+    }
+    run.addEventListener("click", () => {
+        getMatrix()
+        detBlock.innerText = `Determinantul este : ${findDet(matrix)}`
+    })
+    document.addEventListener("input", () => {
+            getMatrix()
+            detBlock.innerText = `Determinantul este : ${findDet(matrix)}`
+    })
+</script>
+</body>
+</html>
